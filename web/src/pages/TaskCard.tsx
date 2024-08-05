@@ -1,155 +1,117 @@
 import React, { useState } from 'react';
-import { Card } from 'antd';
+import { Card, Button, Divider, Form, Input } from 'antd';
 import Task from '../model/Task';
-import { Button, Divider, Flex, Radio, Space, Tooltip } from 'antd';
-import { Form, Input } from 'antd';
 import { CheckOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
-
-const TaskCard: React.FC<{ task: Task, id:Number, title:String, description:String, persona:String, group:Number, completed:Boolean, boolValue: boolean }> = ({ task, id, title, description, persona, group, completed, boolValue }) => {
-  const [position, setPosition] = useState<"start" | "end">("end");
-const [startUpdate,setUpdate]=useState<boolean>(false);
-
-const updateClick=()=>{
-  setUpdate(true);
-  form.setFieldValue("title",title);
-  form.setFieldValue("description",description);
-  form.setFieldValue("persona",persona);
-  form.setFieldValue("group",group);  
+interface TaskCardProps {
+  task: Task;
+  id: number;
+  title: string;
+  description: string;
+  persona: string;
+  group: number;
+  completed: boolean;
+  boolValue: boolean;
 }
 
+const TaskCard: React.FC<TaskCardProps> = ({ task, id, title, description, persona, group, completed, boolValue }) => {
+  const [startUpdate, setUpdate] = useState<boolean>(false);
+  const [form] = Form.useForm();
 
+  const updateClick = () => {
+    setUpdate(true);
+    form.setFieldsValue({ title, description, persona, group });
+  };
 
-const [form] = Form.useForm();
-
-    const submit = async() => {
-        const values = form.getFieldsValue();
-        console.log(values);
-        values.id=id;
-        if(!values.title || !values.description || !values.persona){
-            alert("All fields are necessary");
-        }
-        else
-        {
-            await fetch("/api/tasks/update",{
-                method:"PUT",
-                body:JSON.stringify(values),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then(response => response.json())
-            .then(data => {
-                if(data.success){
-                    alert("Task updated successfully");
-                    reset();
-                    window.location.reload();
-                }
-                else{
-                    alert("Task creation failed");
-                }
-            })
-        }
+  const handleApiRequest = async (url: string, method: string, body?: object) => {
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`Task ${method.toLowerCase()}d successfully`);
+        if (method !== 'PUT') window.location.reload();
+        return true;
+      } else {
+        alert(`Task ${method.toLowerCase()} failed`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error during ${method} request:`, error);
+      alert('An error occurred');
+      return false;
     }
-    const reset = () => {
+  };
+
+  const submit = async () => {
+    const values = form.getFieldsValue();
+    values.id = id;
+    if (!values.title || !values.description || !values.persona) {
+      alert("All fields are necessary");
+    } else {
+      const success = await handleApiRequest("/api/tasks/update", "PUT", values);
+      if (success) {
         setUpdate(false);
+        window.location.reload();
+      }
     }
+  };
 
-  const deleteTask = async() => {
-    console.log("Task deleted");
+  const deleteTask = () => handleApiRequest(`/api/tasks/delete?id=${id}`, "DELETE");
+  const completeTask = () => handleApiRequest("/api/tasks/complete", "POST", { title });
 
-    await fetch(("/api/tasks/delete?id="+id),{
-      method:"DELETE",
-      headers: {
-          'Content-Type': 'application/json'
-      }
-  }).then(response => response.json())
-  .then(data => {
-      if(data.success){
-          alert("Task deleted successfully");
-          window.location.reload();
-      }
-      else{
-          alert("Task deletion failed");
-      }
-  }
-  )
-  }
-  
-  const completeTask = async() => {
-    console.log("Task completed");
-    await fetch("/api/tasks/complete",{
-      method:"POST",
-      body:JSON.stringify({title:title}),
-      headers: {
-          'Content-Type': 'application/json'
-      }
-  }).then(response => response.json())
-  .then(data => {
-      if(data.success){
-          alert("Task completed successfully");
-          window.location.reload();
-      }
-      else{
-          alert("Task completion failed");
-      }
-  })
+  const renderForm = () => (
+    <Form
+      name="validateOnly"
+      layout="horizontal"
+      form={form}
+      initialValues={{ layout: "vertical" }}
+    >
+      {['title', 'description', 'persona'].map(field => (
+        <Form.Item 
+          key={field}
+          name={field} 
+          label={field.charAt(0).toUpperCase() + field.slice(1)}
+          rules={[{ required: true }]} 
+          required 
+          tooltip="This is a required field"
+        >
+          <Input placeholder={`Enter ${field}`} />
+        </Form.Item>
+      ))}
+      <Form.Item>
+        <Button type="primary" onClick={submit}>Submit</Button>
+        <Button htmlType="reset" onClick={() => setUpdate(false)}>Cancel</Button>
+      </Form.Item>
+    </Form>
+  );
 
-  }
+  const renderContent = () => (
+    <div style={{ textAlign: "center" }}>
+      <h3 className="text-center font-semibold text-lg">{title}</h3>
+      <Divider />
+      {description}
+    </div>
+  );
 
   return (
-
     <Card
-      title={"Task " + id}
+      title={`Task ${id}`}
       size="small"
       bordered={false}
       extra={
         <>
-           <Button icon={<CheckOutlined />} onClick={completeTask} iconPosition={position} className="my-3 h-7 w-22" disabled={!boolValue}>
-            
-          </Button>
-
-          &nbsp;
-        <Button icon={<DeleteOutlined />} iconPosition={position} onClick={deleteTask} className="mt-3 h-7 w-22" >
-        
-        </Button>
-        &nbsp;
-        <Button icon={<EditOutlined />} iconPosition={position} onClick={updateClick} className="mt-3 h-7 w-22">
-          
-        </Button>
+          <Button icon={<CheckOutlined />} onClick={completeTask} className="my-3 h-7 w-22" disabled={!boolValue} />
+          <Button icon={<DeleteOutlined />} onClick={deleteTask} className="mt-3 h-7 w-22" />
+          <Button icon={<EditOutlined />} onClick={updateClick} className="mt-3 h-7 w-22" />
         </>
       }
       className="bg-orange-300 w-[45vw] lg:w-[15vw]"
     >
-        {startUpdate?<div>
-        <Form
-          name="validateOnly"
-          layout={"horizontal"}
-          form={form}
-          initialValues={{ layout: "vertical" }}
-        >
-          <Form.Item name="title" label="Title"  rules={[{ required: true }]} required tooltip="This is a required field">
-            <Input placeholder="Enter title" />
-          </Form.Item>
-          <Form.Item name="description" label="Description"  rules={[{ required: true }]} required tooltip="This is a required field">
-            <Input placeholder="Enter description" />
-          </Form.Item>
-          <Form.Item name="persona" label="Persona"  rules={[{ required: true }]} required tooltip="This is a required field">
-            <Input placeholder="Enter persona" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" onClick={submit}>Submit</Button>
-            <Button htmlType="reset" onClick={reset}>Cancel</Button>
-          </Form.Item>
-        </Form>
-      </div>:
-      <div style={{ textAlign: "center" }} >
-        <h3 className="text-center font-semibold text-lg">{title}</h3>
-        <Divider />
-        {description}
-        
-      </div>
-
-      }
+      {startUpdate ? renderForm() : renderContent()}
     </Card>
   );
 };

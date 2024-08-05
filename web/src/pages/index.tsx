@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-// import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import TaskCard from "./TaskCard";
-import { initialTasks } from "@/utils/TaskList";
 import { Inter } from "next/font/google";
-// import { useStateValue } from "@/context/StateProvider";
 import Task from "@/model/Task";
 const inter = Inter({ subsets: ["latin"] });
-import { Badge, Space, Switch } from "antd";
+import { Badge} from "antd";
 import CreateModal from "./CreateModal";
 
 type RestType = {
@@ -15,11 +12,11 @@ type RestType = {
 };
 type FormatDataType = {
   todo: Task[];
-  restData: RestType[];
+  inProgress: Task[];
+  completed: Task[];
 };
 
 export default function Home() {
-  const [tasks, setTasks] = useState(initialTasks);
 
   const getActiveData = async () => {
     const res = await fetch("http://localhost:3000/api/tasks/active");
@@ -55,21 +52,20 @@ export default function Home() {
       if(todo.length>0)
       {
         inProgress.push(
-          { data: activeData[0], status: true },
-          { data: todo[0], status: false }
+          activeData[0],
+          todo[0]
         );
         todo = todo.slice(1);
       }
       else
       {
         inProgress.push(
-          { data: activeData[0], status: true }
+          activeData[0]
         );
       }
     } else if (activeData.length > 1) {
-      inProgress.push(
-        { data: activeData[0], status: true },
-        { data: activeData[1], status: true }
+      inProgress.push(activeData[0],
+        activeData[1]
       );
       const actdata=activeData.slice(2);
       todo=[...actdata,...todo];
@@ -80,17 +76,15 @@ export default function Home() {
     console.log("todo",todo)
     return {
       todo: todo,
-      restData: [
-        { name: "In Progress", data: inProgress },
-        { name: "Completed", data: completedData },
-      ],
+      inProgress:inProgress,
+      completed: completedData,
     };
   };
 
   const [data, setData] = useState<FormatDataType>();
   useEffect(() => {
     const f = async () => {
-      const d: any = await formatData();
+      const d: FormatDataType = await formatData();
       console.log(d);
       setData(d);
     };
@@ -130,7 +124,7 @@ export default function Home() {
           <h3 className="text-center font-semibold text-lg w-[100%]">
             In-Progress &nbsp;
             <Badge
-              count={data !== undefined && data.restData[0].data.length}
+              count={data !== undefined && data.inProgress.length}
               showZero
               color="green"
             />
@@ -138,26 +132,26 @@ export default function Home() {
         </div>
         <div className="gap-6 flex flex-col">
           <div className="grid grid-cols-2 gap-4 w-[100vw] lg:w-[30vw]">
-              {data!==undefined && data.restData[0].data.length>0 &&
-              <TaskCard task={data !== undefined && data.restData[0].data[0].data} 
-                id={data !== undefined && data.restData[0].data[0].data.id}
-                title={data !== undefined && data.restData[0].data[0].data.title}
-                description={data !== undefined && data.restData[0].data[0].data.description}
-                persona={data !== undefined && data.restData[0].data[0].data.persona}
-                group={data !== undefined && data.restData[0].data[0].data.group}
-                completed={data !== undefined && data.restData[0].data[0].data.completed}
+              {data!==undefined && data.inProgress.length>0 &&
+              <TaskCard task={data.inProgress[0]} 
+                id={data.inProgress[0].id}
+                title={data.inProgress[0].title}
+                description={data.inProgress[0].description}
+                persona={data.inProgress[0].persona}
+                group={data.inProgress[0].group}
+                completed={data.inProgress[0].completed}
                 boolValue={true}
               />}
-              {data!==undefined && data.restData[0].data.length>1 && data.restData[0].data[0].data.group!==data.restData[0].data[1].data.group && <br/>}      
+              {data!==undefined && data.inProgress.length>1 && data.inProgress[0].group!==data.inProgress[1].group && <br/>}      
 
-              {data!==undefined && data.restData[0].data.length>1 && <TaskCard task={data !== undefined && data.restData[0].data[1].data} 
-              id={data !== undefined && data.restData[0].data[1].data.id} 
-              title={data !== undefined && data.restData[0].data[1].data.title}
-              description={data !== undefined && data.restData[0].data[1].data.description}
-              persona={data !== undefined && data.restData[0].data[1].data.persona}
-              group={data !== undefined && data.restData[0].data[1].data.group}
-              completed={data !== undefined && data.restData[0].data[1].data.completed}
-              boolValue={data!==undefined && data.restData[0].data[0].data.group===data.restData[0].data[1].data.group}/>}
+              {data!==undefined && data.inProgress.length>1 && <TaskCard task={data.inProgress[1]} 
+              id={data.inProgress[1].id} 
+              title={data.inProgress[1].title}
+              description={data.inProgress[1].description}
+              persona={data.inProgress[1].persona}
+              group={data.inProgress[1].group}
+              completed={data.inProgress[1].completed}
+              boolValue={data.inProgress[0].group===data.inProgress[1].group}/>}
           </div>
         </div>
       </div>
@@ -166,7 +160,7 @@ export default function Home() {
           <h3 className="text-center font-semibold text-lg w-[100%]">
             Completed &nbsp;
             <Badge
-              count={data !== undefined && data.restData[1].data.length}
+              count={data !== undefined && data.completed.length}
               showZero
               color="green"
             />
@@ -175,7 +169,7 @@ export default function Home() {
         <div className="gap-6 flex flex-col">
           <div className="grid grid-cols-2 gap-4 w-[30vw]">
             {data !== undefined &&
-              data.restData[1].data.map((task: Task, index: number) => (
+              data.completed.map((task: Task, index: number) => (
                 <>
                   {" "}
                   {task !== undefined && (
@@ -190,3 +184,54 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const formatData = async () => {
+//   const [completedData, activeData, allData] = await Promise.all([
+//     fetchData("completed"),
+//     fetchData("active"),
+//     fetchData("all"),
+//   ]);
+
+//   let inProgress = [];
+//   let todo = allData.filter(
+//     (item: Task) =>
+//       item?.id !== undefined &&
+//       !item.completed &&
+//       !activeData.some((i: Task) => i.id === item.id)
+//   );
+
+//   if (activeData.length === 1) {
+//     inProgress.push(activeData[0]);
+//     if (todo.length > 0) {
+//       inProgress.push(todo[0]);
+//       todo = todo.slice(1);
+//     }
+//   } else if (activeData.length > 1) {
+//     inProgress.push(
+//      activeData[0],
+//       activeData[1]
+//     );
+//     todo = [...activeData.slice(2), ...todo];
+//   }
+
+//   todo = todo.filter(Boolean);
+
+//   return {
+//     todo,
+//     inProgress ,
+//     completedData,
+//   };
+// };

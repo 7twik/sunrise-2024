@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { initializeTasks, completeTask } from "@/modules/taskManager";
+import { completeTask } from "@/modules/taskManager";
 
 export default async function handler(
   req: NextApiRequest,

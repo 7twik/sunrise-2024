@@ -39,7 +39,7 @@ describe('Task Manager', () => {
       
     ;
   });
-
+ 
   test('should fetch all tasks', () => {
     const allTasks = getAllTasks();
     expect(allTasks).toEqual(
@@ -101,4 +101,33 @@ describe('Task Manager', () => {
       expect.objectContaining({ title: 'Basic Git' })
     );
   });
+   //TEST ADDED BY ME
+   test('should not let later group tasks to be completed before completing the groups before', () => {
+    const completedTasks1 = getCompletedTasks().length;
+    completeTask('Final Project');
+    const completedTasks2 = getCompletedTasks().length;
+    expect(completedTasks1).toEqual(completedTasks2);
+  });
+    //TEST ADDED BY ME
+  test("after deleting a task it shouldn't be in the active tasks", () => {
+    const taskToDelete = getActiveTasks()[0];
+    deleteTask(taskToDelete.id);
+    const activeTasks = getActiveTasks();
+    expect(activeTasks).not.toContainEqual(
+      expect.objectContaining({ id: taskToDelete.id })
+    );
+  });
+
+    //TEST ADDED BY ME
+  test('should not let a task be completed twice', () => {
+    completeTask('Basic Introduction');
+    const completedTasks1 = getCompletedTasks().length;
+    completeTask('Basic Introduction');
+    const completedTasks2 = getCompletedTasks().length;
+    expect(completedTasks1).toEqual(completedTasks2);
+  
+});
+
+  
+
 });

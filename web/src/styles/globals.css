@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 :root {
   --max-width: 1100px;
   --border-radius: 12px;
@@ -38,6 +41,9 @@
   --callout-border-rgb: 172, 175, 176;
   --card-rgb: 180, 185, 188;
   --card-border-rgb: 131, 134, 135;
+}
+zhigh{
+  z-index: 100;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -83,18 +89,13 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  background-color: white;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color:black !important;
+  background: #e5e3c5 !important;
 }
-
 a {
   color: inherit;
   text-decoration: none;

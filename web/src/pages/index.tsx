@@ -42,8 +42,6 @@ export default function Home() {
     let inProgress = [];
     let todo = allData.filter(
       (item: Task) =>
-        item !== undefined &&
-        item.id !== undefined &&
         !item.completed &&
         activeData.findIndex((i: Task) => i.id === item.id) === -1
     );
@@ -101,15 +99,14 @@ export default function Home() {
           <h3 className="text-center font-semibold text-lg w-[100%]">
             To-Do&nbsp;{" "}
             <Badge
-              count={data !== undefined && data.todo.length}
+              count={data?.todo.length}
               showZero
               color="green"
             />
           </h3>
         </div>
           <div className="grid grid-cols-2 gap-4 w-[100vw] lg:w-[30vw]">
-            {data !== undefined &&
-              data.todo.map((task: Task, index: number) => (
+            {data?.todo.map((task: Task, index: number) => (
                 <>
                   {" "}
                   {task !== undefined && (
@@ -124,7 +121,7 @@ export default function Home() {
           <h3 className="text-center font-semibold text-lg w-[100%]">
             In-Progress &nbsp;
             <Badge
-              count={data !== undefined && data.inProgress.length}
+              count={data?.inProgress.length}
               showZero
               color="green"
             />
@@ -160,7 +157,7 @@ export default function Home() {
           <h3 className="text-center font-semibold text-lg w-[100%]">
             Completed &nbsp;
             <Badge
-              count={data !== undefined && data.completed.length}
+              count={data?.completed.length}
               showZero
               color="green"
             />
@@ -168,8 +165,7 @@ export default function Home() {
         </div>
         <div className="gap-6 flex flex-col">
           <div className="grid grid-cols-2 gap-4 w-[30vw]">
-            {data !== undefined &&
-              data.completed.map((task: Task, index: number) => (
+            {data?.completed.map((task: Task, index: number) => (
                 <>
                   {" "}
                   {task !== undefined && (
@@ -184,54 +180,3 @@ export default function Home() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const formatData = async () => {
-//   const [completedData, activeData, allData] = await Promise.all([
-//     fetchData("completed"),
-//     fetchData("active"),
-//     fetchData("all"),
-//   ]);
-
-//   let inProgress = [];
-//   let todo = allData.filter(
-//     (item: Task) =>
-//       item?.id !== undefined &&
-//       !item.completed &&
-//       !activeData.some((i: Task) => i.id === item.id)
-//   );
-
-//   if (activeData.length === 1) {
-//     inProgress.push(activeData[0]);
-//     if (todo.length > 0) {
-//       inProgress.push(todo[0]);
-//       todo = todo.slice(1);
-//     }
-//   } else if (activeData.length > 1) {
-//     inProgress.push(
-//      activeData[0],
-//       activeData[1]
-//     );
-//     todo = [...activeData.slice(2), ...todo];
-//   }
-
-//   todo = todo.filter(Boolean);
-
-//   return {
-//     todo,
-//     inProgress ,
-//     completedData,
-//   };
-// };

@@ -15,11 +15,11 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task, id, title, description, persona, group, completed, boolValue }) => {
-  const [startUpdate, setUpdate] = useState<boolean>(false);
+  const [startUpdate, setStartUpdate] = useState<boolean>(false);
   const [form] = Form.useForm();
 
   const updateClick = () => {
-    setUpdate(true);
+    setStartUpdate(true);
     form.setFieldsValue({ title, description, persona, group });
   };
 
@@ -54,7 +54,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, id, title, description, perso
     } else {
       const success = await handleApiRequest("/api/tasks/update", "PUT", values);
       if (success) {
-        setUpdate(false);
+        setStartUpdate(false);
         window.location.reload();
       }
     }
@@ -84,7 +84,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, id, title, description, perso
       ))}
       <Form.Item>
         <Button type="primary" onClick={submit}>Submit</Button>
-        <Button htmlType="reset" onClick={() => setUpdate(false)}>Cancel</Button>
+        <Button htmlType="reset" onClick={() => setStartUpdate(false)}>Cancel</Button>
       </Form.Item>
     </Form>
   );
